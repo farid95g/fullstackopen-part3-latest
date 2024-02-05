@@ -1,0 +1,27 @@
+{
+  "name": "fullstackopen-part3-latest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/farid95g/fullstackopen-part3-latest.git"
+  },
+  "author": "Farid Guluzade",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/farid95g/fullstackopen-part3-latest/issues"
+  },
+  "homepage": "https://github.com/farid95g/fullstackopen-part3-latest#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
+}
