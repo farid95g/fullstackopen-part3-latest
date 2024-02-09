@@ -74,5 +74,5 @@ app.get('/info', (_, response) => {
     `)
 })
 
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => `App is running on the port ${PORT}`)
