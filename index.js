@@ -1,7 +1,9 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 let { persons } = require('./data/index')
+const Person = require('./models/person')
 
 morgan.token('body', function getBody (request) {
     return JSON.stringify(request.body)
@@ -15,7 +17,9 @@ app.use(express.static('dist'))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 app.get('/api/persons', (_, response) => {
-    response.json(persons)
+    Person
+        .find({})
+        .then(persons => response.json(persons))
 })
 
 app.get('/api/persons/:id', (request, response) => {
@@ -59,13 +63,10 @@ app.post('/api/persons', (request, response) => {
         })
     }
 
-    const person = {
-        id: Math.random(),
-        ...body
-    }
-
-    persons = persons.concat(person)
-    response.json(person)
+    const person = new Person(body)
+    person
+        .save()
+        .then(savedPerson => response.json(savedPerson))
 })
 
 app.get('/info', (_, response) => {

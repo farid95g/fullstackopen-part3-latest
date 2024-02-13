@@ -21,6 +21,7 @@
   "homepage": "https://github.com/farid95g/fullstackopen-part3-latest#readme",
   "dependencies": {
     "cors": "^2.8.5",
+    "dotenv": "^16.4.3",
     "express": "^4.18.2",
     "mongoose": "^8.1.2",
     "morgan": "^1.10.0"
