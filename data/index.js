@@ -1,4 +1,4 @@
-const persons = [
+exports.persons = [
     { 
       "id": 1,
       "name": "Arto Hellas", 
@@ -20,7 +20,3 @@ const persons = [
       "number": "39-23-6423122"
     }
 ]
-
-module.exports = {
-  persons
-}
