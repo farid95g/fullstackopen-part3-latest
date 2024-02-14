@@ -16,30 +16,50 @@ app.use(cors())
 app.use(express.static('dist'))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
+const errorHandler = (error, request, response, next) => {
+    if (error.name === 'CastError') {
+        response.status(400).json({
+            'message': 'Malformatted ID'
+        })
+    }
+
+    next(error)
+}
+
 app.get('/api/persons', (_, response) => {
     Person
         .find({})
         .then(persons => response.json(persons))
 })
 
-app.get('/api/persons/:id', (request, response) => {
-    const id = +request.params.id
-    const person = persons.find(p => p.id === id)
-
-    if (!person) {
-        return response.status(404).end()
-    }
-
-    response.json(person)
+app.get('/api/persons/:id', (request, response, next) => {
+    Person
+        .findById(request.params.id)
+        .then(foundedPerson => {
+            if (foundedPerson) {
+                response.json(foundedPerson)
+            } else {
+                response.status(404).end()
+            }
+        })
+        .catch(error => next(error))
 })
 
 app.delete('/api/persons/:id', (request, response) => {
-    const id = +request.params.id
-    persons = persons.filter(p => p.id !== id)
-    response.status(204).end()
+    Person
+        .findByIdAndDelete(request.params.id)
+        .then(result => {
+            if (result) {
+                response.status(204).end()
+            }
+            response.status(404).json({
+                message: `Person with id ${request.params.id} does not exist in the phonebook.`
+            })
+        })
+        .catch(error => console.log(error.message))
 })
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
     const requiredFields = ['name', 'number']
     const responseMessages = {
         missing: (fields) => `The field ${fields} is required!`,
@@ -57,24 +77,49 @@ app.post('/api/persons', (request, response) => {
         return response.status(400).json({
             error: responseMessages.missing(missingFields.join(' and '))
         })
-    } else if (persons.find(p => p.name === body.name)) {
-        return response.status(400).json({
-            error: responseMessages.unique(body.name)
-        })
     }
 
-    const person = new Person(body)
-    person
-        .save()
-        .then(savedPerson => response.json(savedPerson))
+    Person
+        .findOne({ name: body.name })
+        .then(foundedPerson => {
+            if (!foundedPerson) {
+                const person = new Person(body)
+
+                person
+                    .save()
+                    .then(savedPerson => response.json(savedPerson))
+                    .catch(error => next(error))
+            } else {
+                response.status(422).json({
+                    message: `User named ${foundedPerson.name} already exists.`,
+                    id: foundedPerson.id
+                })
+            }
+        })
 })
 
-app.get('/info', (_, response) => {
-    response.send(`
-        <p>Phonebook has info for ${persons.length} people</p>
-        <p>${new Date()}</p>
-    `)
+app.put('/api/persons/:id', (request, response, next) => {
+    Person
+        .findByIdAndUpdate(request.params.id, request.body, { new: true })
+        .then(updatedPerson => {
+            response.json(updatedPerson)
+        })
+        .catch(error => next(error))
 })
+
+app.get('/info', (_, response, next) => {
+    Person
+        .find({})
+        .then(persons => {
+            response.send(`
+                <p>Phonebook has info for ${persons.length} people</p>
+                <p>${new Date()}</p>
+            `)
+        })
+        .catch(error => next(error))
+})
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => `App is running on the port ${PORT}`)
